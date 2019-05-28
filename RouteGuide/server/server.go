@@ -65,7 +65,12 @@ func (s *routeGuideServer) GetFeature(ctx context.Context, point *pb.Point) (*pb
 // 请求对象是一个 Rectangle，客户端期望从中找到 Feature
 // 这次我们得到了一个请求对象和一个特殊的 RouteGuide_ListFeaturesServer 来写入我们的响应，__而不是__ 得到方法参数中的简单请求和响应对象。
 func (s *routeGuideServer) ListFeatures(rect *pb.Rectangle, stream pb.RouteGuide_ListFeaturesServer) error {
+	log.Printf("【2. 服务器端流式 RPC -- 接收】 %v", rect)
+
 	for _, feature := range s.savedFeatures {
+		log.Printf("【2. 服务器端流式 RPC -- 发送中】 %v", feature)
+		//time.Sleep(1 * time.Second) // 可模拟失败的情况
+
 		if util.InRange(feature.Location, rect) {
 			// 我们需要将多个 Feature 发回给客户端
 			if err := stream.Send(feature); err != nil {
@@ -75,6 +80,8 @@ func (s *routeGuideServer) ListFeatures(rect *pb.Rectangle, stream pb.RouteGuide
 			}
 		}
 	}
+
+	log.Printf("【2. 服务器端流式 RPC -- 流发送结束】")
 
 	// 返回了一个 nil 错误告诉 gRPC 响应的写入已经完成
 	return nil

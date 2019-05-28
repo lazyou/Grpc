@@ -43,7 +43,7 @@ func printFeature(client pb.RouteGuideClient, point *pb.Point) {
 }
 
 // printFeatures lists all the features within the given bounding Rectangle.
-// 服务器端流式 RPC
+// 2. 服务器端流式 RPC
 func printFeatures(client pb.RouteGuideClient, rect *pb.Rectangle) {
 	log.Printf("Looking for features within %v", rect)
 
@@ -62,6 +62,8 @@ func printFeatures(client pb.RouteGuideClient, rect *pb.Rectangle) {
 	// 如果返回为 io.EOF，则说明消息流已经结束；否则就一定是一个通过 err 传过来的 RPC 错误。
 	for {
 		feature, err := stream.Recv()
+
+		// 服务端流发送结束， 跳出 for
 		if err == io.EOF {
 			break
 		}
@@ -70,8 +72,10 @@ func printFeatures(client pb.RouteGuideClient, rect *pb.Rectangle) {
 			log.Fatalf("%v.ListFeatures(_) = _, %v", client, err)
 		}
 
-		log.Println(feature)
+		log.Printf("【2. 服务器端流式 RPC -- 接收中】 %v", feature)
 	}
+
+	log.Printf("【2. 服务器端流式 RPC -- 接收结束】")
 }
 
 // runRecordRoute sends a sequence of points to server and expects to get a RouteSummary from server.
