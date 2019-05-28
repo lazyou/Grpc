@@ -18,6 +18,7 @@ const (
 
 // server is used to implement helloworld.GreeterServer.
 type server struct {
+	pb.GreeterServer // PS: struct 包含(内嵌) interface 之后，并不需要实现 interface 的接口，也能成为 interface 接口类
 }
 
 // SayHello implements helloworld.GreeterServer
