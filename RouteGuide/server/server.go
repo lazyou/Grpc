@@ -1,26 +1,9 @@
-/*
- *
- * Copyright 2015 gRPC authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- */
-
 //go:generate protoc -I ../routeguide --go_out=plugins=grpc:../routeguide ../routeguide/RouteGuide.proto
 
 // Package main implements a simple gRPC server that demonstrates how to use gRPC-Go libraries
 // to perform unary, client streaming, server streaming and full duplex RPCs.
-//
+// gRPC 允许定义 四类服务方法 演示: 1.单项 RPC; 2.服务端流式 RPC; 3.客户端流式 RPC; 4.双向流式 RPC
+
 // It implements the route guide service whose definition can be found in routeguide/RouteGuide.proto.
 package main
 
@@ -37,12 +20,10 @@ import (
 	"sync"
 	"time"
 
+	"github.com/golang/protobuf/proto"
 	"google.golang.org/grpc"
-
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/testdata"
-
-	"github.com/golang/protobuf/proto"
 
 	pb "RouteGuide/routeguide"
 )
@@ -63,7 +44,7 @@ type routeGuideServer struct {
 }
 
 // GetFeature returns the feature at the given point.
-// 简单 RPC: 从客户端拿到一个 Point 对象，然后从返回包含从数据库拿到的feature信息的 Feature
+// 1. 简单 RPC: 从客户端拿到一个 Point 对象，然后从返回包含从数据库拿到的feature信息的 Feature
 // 该方法传入了 RPC 的上下文对象，以及客户端的 Point protocol buffer请求。
 // 它返回了一个包含响应信息和error 的 Feature protocol buffer对象。
 func (s *routeGuideServer) GetFeature(ctx context.Context, point *pb.Point) (*pb.Feature, error) {
@@ -78,7 +59,7 @@ func (s *routeGuideServer) GetFeature(ctx context.Context, point *pb.Point) (*pb
 }
 
 // ListFeatures lists all features contained within the given bounding Rectangle.
-// 服务器端流式 RPC
+// 2. 服务器端流式 RPC
 // 请求对象是一个 Rectangle，客户端期望从中找到 Feature
 // 这次我们得到了一个请求对象和一个特殊的 RouteGuide_ListFeaturesServer 来写入我们的响应，__而不是__ 得到方法参数中的简单请求和响应对象。
 func (s *routeGuideServer) ListFeatures(rect *pb.Rectangle, stream pb.RouteGuide_ListFeaturesServer) error {
