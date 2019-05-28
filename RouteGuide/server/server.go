@@ -48,6 +48,8 @@ type routeGuideServer struct {
 // 该方法传入了 RPC 的上下文对象，以及客户端的 Point protocol buffer请求。
 // 它返回了一个包含响应信息和error 的 Feature protocol buffer对象。
 func (s *routeGuideServer) GetFeature(ctx context.Context, point *pb.Point) (*pb.Feature, error) {
+	log.Printf("【1. 简单 RPC -- 接收】 %v", point)
+
 	for _, feature := range s.savedFeatures {
 		if proto.Equal(feature.Location, point) {
 			return feature, nil
@@ -162,8 +164,9 @@ func (s *routeGuideServer) RouteChat(stream pb.RouteGuide_RouteChatServer) error
 // loadFeatures loads features from a JSON file.
 func (s *routeGuideServer) loadFeatures(filePath string) {
 	var data []byte
+	var err error
+
 	if filePath != "" {
-		var err error
 		data, err = ioutil.ReadFile(filePath)
 		if err != nil {
 			log.Fatalf("Failed to load default features: %v", err)
@@ -171,6 +174,7 @@ func (s *routeGuideServer) loadFeatures(filePath string) {
 	} else {
 		data = util.GetExampleData()
 	}
+
 	if err := json.Unmarshal(data, &s.savedFeatures); err != nil {
 		log.Fatalf("Failed to load default features: %v", err)
 	}

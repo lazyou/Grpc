@@ -22,12 +22,13 @@ var (
 	caFile             = flag.String("ca_file", "", "The file containning the CA root cert file")
 	serverAddr         = flag.String("server_addr", "127.0.0.1:40000", "The server address in the format of host:port")
 	serverHostOverride = flag.String("server_host_override", "x.test.youtube.com", "The server name use to verify the hostname returned by TLS handshake")
+	runFunName         = flag.String("funcName", "printFeature", "要执行的方法, 方便代码阅读查看效果")
 )
 
 // printFeature gets the feature for the given point.
-// 简单 RPC
+// 1. 简单 RPC
 func printFeature(client pb.RouteGuideClient, point *pb.Point) {
-	log.Printf("Getting feature for point (%d, %d)", point.Latitude, point.Longitude)
+	log.Printf("【1. 简单 RPC -- 请求】 Getting feature for point (%d, %d)", point.Latitude, point.Longitude)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -38,7 +39,7 @@ func printFeature(client pb.RouteGuideClient, point *pb.Point) {
 		log.Fatalf("%v.GetFeatures(_) = _, %v: ", client, err)
 	}
 
-	log.Println(feature)
+	log.Printf("【1. 简单 RPC -- 返回值】 %v", feature)
 }
 
 // printFeatures lists all the features within the given bounding Rectangle.
@@ -195,21 +196,39 @@ func main() {
 	// 通过 .proto 生成的 pb 包提供的 NewRouteGuideClient 方法来完成
 	client := pb.NewRouteGuideClient(conn)
 
-	// Looking for a valid feature
-	printFeature(client, &pb.Point{Latitude: 409146138, Longitude: -746188906})
+	// 运行示例: go run client.go -funcName printFeature
 
-	// Feature missing.
-	printFeature(client, &pb.Point{Latitude: 0, Longitude: 0})
+	if *runFunName == "printFeature" {
+		// Looking for a valid feature
+		var pointExist = &pb.Point{
+			Latitude:  409146138,
+			Longitude: -746188906,
+		}
+		printFeature(client, pointExist)
 
-	// Looking for features between 40, -75 and 42, -73.
-	printFeatures(client, &pb.Rectangle{
-		Lo: &pb.Point{Latitude: 400000000, Longitude: -750000000},
-		Hi: &pb.Point{Latitude: 420000000, Longitude: -730000000},
-	})
+		// Feature missing.
+		var pointNoExist = &pb.Point{
+			Latitude:  0,
+			Longitude: 0,
+		}
+		printFeature(client, pointNoExist)
+	}
 
-	// RecordRoute
-	runRecordRoute(client)
+	if *runFunName == "printFeatures" {
+		// Looking for features between 40, -75 and 42, -73.
+		printFeatures(client, &pb.Rectangle{
+			Lo: &pb.Point{Latitude: 400000000, Longitude: -750000000},
+			Hi: &pb.Point{Latitude: 420000000, Longitude: -730000000},
+		})
+	}
 
-	// RouteChat
-	runRouteChat(client)
+	if *runFunName == "runRecordRoute" {
+		// RecordRoute
+		runRecordRoute(client)
+	}
+
+	if *runFunName == "runRouteChat" {
+		// RouteChat
+		runRouteChat(client)
+	}
 }
