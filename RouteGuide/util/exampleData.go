@@ -1,4 +1,12 @@
-[{
+package util
+
+func GetExampleData() []byte {
+	return exampleData
+}
+
+// exampleData is a copy of testdata/route_guide_db.json. It's to avoid
+// specifying file path with `go run`.
+var exampleData = []byte(`[{
     "location": {
         "latitude": 407838351,
         "longitude": -746143763
@@ -598,4 +606,4 @@
         "longitude": -747127767
     },
     "name": "3 Hasta Way, Newton, NJ 07860, USA"
-}]
+}]`)

@@ -11,6 +11,7 @@ import (
 	"time"
 
 	pb "RouteGuide/routeguide"
+	"RouteGuide/util"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/testdata"
@@ -19,7 +20,7 @@ import (
 var (
 	tls                = flag.Bool("tls", false, "Connection uses TLS if true, else plain TCP")
 	caFile             = flag.String("ca_file", "", "The file containning the CA root cert file")
-	serverAddr         = flag.String("server_addr", "127.0.0.1:10000", "The server address in the format of host:port")
+	serverAddr         = flag.String("server_addr", "127.0.0.1:40000", "The server address in the format of host:port")
 	serverHostOverride = flag.String("server_host_override", "x.test.youtube.com", "The server name use to verify the hostname returned by TLS handshake")
 )
 
@@ -82,7 +83,7 @@ func runRecordRoute(client pb.RouteGuideClient) {
 	var points []*pb.Point
 
 	for i := 0; i < pointCount; i++ {
-		points = append(points, randomPoint(r))
+		points = append(points, util.RandomPoint(r))
 	}
 
 	log.Printf("Traversing %d points.", len(points))
@@ -161,12 +162,6 @@ func runRouteChat(client pb.RouteGuideClient) {
 	stream.CloseSend()
 
 	<-waitc
-}
-
-func randomPoint(r *rand.Rand) *pb.Point {
-	lat := (r.Int31n(180) - 90) * 1e7
-	long := (r.Int31n(360) - 180) * 1e7
-	return &pb.Point{Latitude: lat, Longitude: long}
 }
 
 func main() {
