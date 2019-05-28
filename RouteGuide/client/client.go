@@ -79,19 +79,21 @@ func printFeatures(client pb.RouteGuideClient, rect *pb.Rectangle) {
 }
 
 // runRecordRoute sends a sequence of points to server and expects to get a RouteSummary from server.
+// 3. 客户端流式 RPC
 // 需要给方法传入一个上下文而后返回 RouteGuide_RecordRouteClient 流以外，
 // 客户端流方法 RecordRoute 和服务器端方法类似，它可以用来读 和 写消息
 func runRecordRoute(client pb.RouteGuideClient) {
 	// Create a random number of random points
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	pointCount := int(r.Int31n(100)) + 2 // Traverse at least two points
-	var points []*pb.Point
 
+	var points []*pb.Point
 	for i := 0; i < pointCount; i++ {
 		points = append(points, util.RandomPoint(r))
 	}
 
 	log.Printf("Traversing %d points.", len(points))
+
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 

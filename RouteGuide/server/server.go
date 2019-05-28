@@ -108,6 +108,8 @@ func (s *routeGuideServer) RecordRoute(stream pb.RouteGuide_RecordRouteServer) e
 	for {
 		// Recv() 方法接收客户端消息
 		point, err := stream.Recv()
+		log.Printf("【3. 客户端流式 RPC -- 接收】 %v", point)
+
 		if err == io.EOF {
 			endTime := time.Now()
 			// SendAndClose() 方法返回它的单个响应
