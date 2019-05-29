@@ -156,6 +156,7 @@ func runRouteChat(client pb.RouteGuideClient) {
 	// 后接受 server 发来的数据
 	waitc := make(chan struct{})
 
+	// TODO: 为什么用 go, 为什么用 chan, 为什么 <- ? 如何知道我的业务需要这样做?
 	go func() {
 		for {
 			in, err := stream.Recv()
