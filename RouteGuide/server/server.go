@@ -92,6 +92,7 @@ func (s *routeGuideServer) ListFeatures(rect *pb.Rectangle, stream pb.RouteGuide
 // It gets a stream of points, and responds with statistics about the "trip":
 // number of points,  number of known features visited, total distance traveled, and
 // total time spent.
+// 3. 客户端流式 RPC
 // 从客户端拿到一个 Point 的流，其中包括它们路径的信息.
 // 如你所见，这次这个方法没有请求参数。相反的，它拿到了一个 RouteGuide_RecordRouteServer 流:
 // 服务器可以用它来同时读 和 写消息 —— 它可以用自己的 Recv() 方法接收客户端消息并且用 SendAndClose() 方法返回它的单个响应。
@@ -142,17 +143,24 @@ func (s *routeGuideServer) RecordRoute(stream pb.RouteGuide_RecordRouteServer) e
 
 // RouteChat receives a stream of message/location pairs, and responds with a stream of all
 // previous messages at each of those locations.
+// 4. 双向流式 RPC
 func (s *routeGuideServer) RouteChat(stream pb.RouteGuide_RouteChatServer) error {
 	for {
+		// 先接收 client
 		in, err := stream.Recv()
+
 		if err == io.EOF {
 			return nil
 		}
+
 		if err != nil {
 			return err
 		}
+
+		log.Printf("【4. 双向流式 RPC -- 接收 client 数据】 %v", in)
 		key := util.Serialize(in.Location)
 
+		// TODO: 这里为什么加锁
 		s.mu.Lock()
 		s.routeNotes[key] = append(s.routeNotes[key], in)
 		// Note: this copy prevents blocking other clients while serving this one.
@@ -162,11 +170,18 @@ func (s *routeGuideServer) RouteChat(stream pb.RouteGuide_RouteChatServer) error
 		copy(rn, s.routeNotes[key])
 		s.mu.Unlock()
 
+		//log.Printf("【4. 双向流式 RPC -- rn 是啥】 %v", rn)
+
 		for _, note := range rn {
+			// 再把数据发给 client
 			if err := stream.Send(note); err != nil {
 				return err
 			}
+
+			log.Printf("【4. 双向流式 RPC -- 发向 client 数据】 %v", note)
 		}
+
+		fmt.Println()
 	}
 }
 

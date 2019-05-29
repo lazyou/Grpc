@@ -5,6 +5,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"io"
 	"log"
 	"math/rand"
@@ -121,6 +122,7 @@ func runRecordRoute(client pb.RouteGuideClient) {
 }
 
 // runRouteChat receives a sequence of route notes, while sending notes for various locations.
+// 4. 双向流式 RPC
 // 和 RecordRoute 的场景类似，只给函数传 入一个上下文对象，拿到可以用来读写的流。
 // 但是，当服务器依然在往 他们 的消息流写入消息时，通过方法流返回值
 func runRouteChat(client pb.RouteGuideClient) {
@@ -141,34 +143,44 @@ func runRouteChat(client pb.RouteGuideClient) {
 		log.Fatalf("%v.RouteChat(_) = _, %v", client, err)
 	}
 
+	// 先发送到 server
+	for _, note := range notes {
+		if err := stream.Send(note); err != nil {
+			log.Fatalf("Failed to send a note: %v", err)
+		}
+
+		log.Printf("【4. 双向流式 RPC -- 发送】 %v", note)
+		fmt.Println()
+	}
+
+	// 后接受 server 发来的数据
 	waitc := make(chan struct{})
 
 	go func() {
 		for {
 			in, err := stream.Recv()
+
 			if err == io.EOF {
 				// read done.
 				close(waitc)
 				return
 			}
 
+			log.Printf("【4. 双向流式 RPC -- 接收】 %v", in)
+
 			if err != nil {
 				log.Fatalf("Failed to receive a note : %v", err)
 			}
 
 			log.Printf("Got message %s at point(%d, %d)", in.Message, in.Location.Latitude, in.Location.Longitude)
+			fmt.Println()
 		}
 	}()
 
-	for _, note := range notes {
-		if err := stream.Send(note); err != nil {
-			log.Fatalf("Failed to send a note: %v", err)
-		}
-	}
-
 	stream.CloseSend()
 
-	<-waitc
+	sha := <-waitc
+	log.Printf("这是啥: %v", sha)
 }
 
 func main() {
