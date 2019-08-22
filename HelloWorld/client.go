@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
-	pb "test/helloworld"
+	"test/protobuf"
 )
 
 const (
@@ -26,7 +26,7 @@ func main() {
 	defer conn.Close()
 
 	// 与 RPC 服务器连接的客户端
-	c := pb.NewGreeterClient(conn)
+	c := protobuf.NewHelloClient(conn)
 
 	// Contact the server and print out its response.
 	name := defaultName
@@ -39,7 +39,7 @@ func main() {
 	defer cancel()
 
 	// 客户端调用 RPC 方法, 接收服务端返回值
-	r, err := c.SayHello(ctx, &pb.HelloRequest{Name: name})
+	r, err := c.SayHello(ctx, &protobuf.HelloRequest{Name: name})
 	if err != nil {
 		log.Fatalf("could not greet: %v", err)
 	}

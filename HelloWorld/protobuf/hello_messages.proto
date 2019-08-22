@@ -1,0 +1,16 @@
+// hello 服务所用的 message 定义
+syntax = "proto3";
+
+package protobuf;
+import "common_messages.proto";
+
+// 请求
+message HelloRequest {
+	string name = 1;
+}
+
+// 响应
+message HelloResponse {
+	BaseResponse result = 1;
+	string message = 2;
+}

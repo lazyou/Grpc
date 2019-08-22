@@ -1,0 +1,12 @@
+// hello 服务定义
+syntax = "proto3";
+
+package protobuf;
+
+import public "hello_messages.proto";
+
+// 服务定义
+service Hello {
+    // SayHello 方法请求接收 HelloRequest 响应返回 HelloReply
+    rpc SayHello (HelloRequest) returns (HelloResponse) {}
+}

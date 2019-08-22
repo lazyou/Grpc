@@ -1,0 +1,15 @@
+// 公共(通用) message 定义
+
+syntax = "proto3";
+
+package protobuf;
+
+// 基础响应
+message BaseResponse {
+    // 业务是否成功
+    bool is_ok = 1;
+    // 业务状态码: 默认0, 其它公共状态码待定义, 可参考http状态码.
+    int64 code = 2;
+    // 信息: 例如错误信息, 或者其他提示语
+    string message  = 3;
+}
