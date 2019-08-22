@@ -5,3 +5,5 @@
 
 * 自签名公钥:    
     * `openssl req -new -x509 -sha256 -key server.key -out server.pem -days 3650`
+
+    * 注意: 在 Common Name 输入的值要记住, 客户端(client.go)需要用.

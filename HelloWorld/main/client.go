@@ -3,6 +3,8 @@ package main
 
 import (
 	"context"
+	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/grpclog"
 	"log"
 	"os"
 	"time"
@@ -17,9 +19,15 @@ const (
 )
 
 func main() {
+	// TLS连接
+	credential, err := credentials.NewClientTLSFromFile("../keys/server.pem", "lin")
+	if err != nil {
+		grpclog.Fatalf("Failed to create TLS credentials %v", err)
+	}
+
 	// Set up a connection to the server.
 	// 连接服务: 在 gRPC Go 是使用一个特殊的 Dial() 方法来创建频道
-	conn, err := grpc.Dial(address, grpc.WithInsecure())
+	conn, err := grpc.Dial(address, grpc.WithTransportCredentials(credential))
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
