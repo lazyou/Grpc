@@ -12,8 +12,8 @@ type HelloServer struct {
 	protobuf.HelloServer // PS: struct 包含(内嵌) interface 之后，并不需要实现 interface 的接口，也能成为 interface 接口类
 }
 
-func (s *HelloServer) SayHello(ctx context.Context, in *protobuf.HelloRequest) (*protobuf.HelloResponse, error) {
-	log.Printf("Received: %v \n", in.Name)
+func (s *HelloServer) SayHello(ctx context.Context, request *protobuf.HelloRequest) (*protobuf.HelloResponse, error) {
+	log.Printf("Received: %v \n", request.Name)
 
 	return &protobuf.HelloResponse{
 		Result: &protobuf.BaseResponse{
@@ -21,6 +21,6 @@ func (s *HelloServer) SayHello(ctx context.Context, in *protobuf.HelloRequest) (
 			Code:    200,
 			Message: "",
 		},
-		Message: "Hello! " + in.Name,
+		Message: "Hello! " + request.Name,
 	}, nil
 }
