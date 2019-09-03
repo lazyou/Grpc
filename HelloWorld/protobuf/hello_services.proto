@@ -9,4 +9,7 @@ import public "hello_messages.proto";
 service Hello {
     // SayHello 方法请求接收 HelloRequest 响应返回 HelloReply
     rpc SayHello (HelloRequest) returns (HelloResponse) {}
+
+    // 服务端流
+    rpc SayHelloServerStream(HelloRequest) returns (stream HelloResponse) {}
 }

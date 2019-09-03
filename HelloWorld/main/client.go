@@ -5,6 +5,7 @@ import (
 	"context"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/grpclog"
+	"io"
 	"log"
 	"os"
 	"time"
@@ -34,7 +35,7 @@ func main() {
 	defer conn.Close()
 
 	// 与 RPC 服务器连接的客户端
-	c := protobuf.NewHelloClient(conn)
+	helloClient := protobuf.NewHelloClient(conn)
 
 	// Contact the server and print out its response.
 	name := defaultName
@@ -47,10 +48,31 @@ func main() {
 	defer cancel()
 
 	// 客户端调用 RPC 方法, 接收服务端返回值
-	r, err := c.SayHello(ctx, &protobuf.HelloRequest{Name: name})
+	result, err := helloClient.SayHello(ctx, &protobuf.HelloRequest{Name: name})
 	if err != nil {
-		log.Fatalf("could not greet: %v", err)
+		log.Fatalf("SayHello err: %v", err)
 	}
 
-	log.Printf("Greeting: %s", r.Message)
+	log.Printf("SayHello: %s", result.Message)
+
+	// 客户端调用 RPC 服务端流方法
+	stream, err := helloClient.SayHelloServerStream(context.Background(), &protobuf.HelloRequest{Name: name})
+	if err != nil {
+		log.Printf("ServerStream: %s", result.Message)
+	}
+
+	for {
+		streamResult, err := stream.Recv()
+		if err == io.EOF {
+			log.Printf("ServerStream EOF \n")
+			break
+		}
+
+		if err != nil {
+			log.Fatalf("ServerStream err: %v\n", err)
+		}
+
+		log.Printf("ServerStream: %s", streamResult)
+	}
+
 }
