@@ -15,7 +15,7 @@ type HelloServer struct {
 }
 
 func (s *HelloServer) SayHello(ctx context.Context, request *protobuf.HelloRequest) (*protobuf.HelloResponse, error) {
-	log.Printf("Received: %v \n", request.Name)
+	log.Printf("Received %s: %s \n", util.ClientIP(ctx), request.Name)
 
 	return &protobuf.HelloResponse{
 		Result: &protobuf.BaseResponse{
@@ -28,7 +28,7 @@ func (s *HelloServer) SayHello(ctx context.Context, request *protobuf.HelloReque
 }
 
 func (s *HelloServer) SayHelloServerStream(request *protobuf.HelloRequest, stream protobuf.Hello_SayHelloServerStreamServer) error {
-	log.Printf("Received: %v \n", request.Name)
+	log.Printf("Received %s: %s \n", util.ClientIP(stream.Context()), request.Name)
 
 	// 每秒
 	for {
